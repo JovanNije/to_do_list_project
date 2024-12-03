@@ -2,19 +2,21 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MaterialApp(home: MainApp())); // Ensure MaterialApp is the root widget
+  runApp(const MaterialApp(home: MainApp(), debugShowCheckedModeBanner: false, )); // Ensure MaterialApp is the root widget
 }
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
-
   @override
   _MainAppState createState() => _MainAppState();
 }
 
 class _MainAppState extends State<MainApp> {
-  // List to store tasks along with their random background colors
+  // List to store tasks along with their random background colors and favorite status
   List<Map<String, dynamic>> tasks = [];
+
+  // List to store favorite tasks
+  List<Map<String, dynamic>> favoriteTasks = [];
 
   // Controller to manage TextField input
   TextEditingController taskController = TextEditingController();
@@ -31,15 +33,41 @@ class _MainAppState extends State<MainApp> {
     return Color.fromRGBO(red, green, blue, 1);
   }
 
+  // Function to toggle the favorite state of a task
+  void _toggleFavorite(int index) {
+    setState(() {
+      tasks[index]['isFavorite'] = !tasks[index]['isFavorite'];
+
+      // Add/remove task to/from the favoriteTasks list
+      if (tasks[index]['isFavorite']) {
+        favoriteTasks.add(tasks[index]);
+      } else {
+        favoriteTasks.remove(tasks[index]);
+      }
+    });
+  }
+
+  // Navigate to Home or Favorites page
+  void _navigateToPage(String page) {
+    if (page == 'Home') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => MainApp()),
+      );
+    } else if (page == 'Favorites') {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => FavoritesPage(favoriteTasks: favoriteTasks)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: _buildAppBar(),
-        body: _buildBody(),
-        floatingActionButton: _buildFloatingActionButtons(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      ),
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _buildBody(),
+      floatingActionButton: _buildFloatingActionButtons(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      drawer: _buildDrawer(), // Add Drawer (sidebar)
     );
   }
 
@@ -47,6 +75,17 @@ class _MainAppState extends State<MainApp> {
     return AppBar(
       title: const Text('To-Do List'),
       backgroundColor: Colors.blue,
+      // Use Builder to get the correct context to open the Drawer
+      leading: Builder(
+        builder: (BuildContext context) {
+          return IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer(); // Opens the Drawer when clicked
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -70,7 +109,7 @@ class _MainAppState extends State<MainApp> {
       decoration: const InputDecoration(
         labelText: 'Enter Task',
         border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15), // Padding inside the TextField
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       ),
     );
   }
@@ -84,16 +123,30 @@ class _MainAppState extends State<MainApp> {
           return GestureDetector(
             onTap: () {
               setState(() {
-                selectedIndex = index; // Select the task
+                selectedIndex = index;
               });
             },
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 8.0), // Space between tasks
+              padding: const EdgeInsets.only(bottom: 8.0),
               child: ListTile(
                 tileColor: selectedIndex == index
-                    ? Colors.grey[300] // Highlight selected task
-                    : task['color'], // Use task's background color
-                title: Text(task['task']),
+                    ? Colors.grey[300]
+                    : task['color'],
+                title: Row(
+                  children: [
+                    Expanded(child: Text(task['task'])),
+                    IconButton(
+                      onPressed: () => _toggleFavorite(index),
+                      icon: Icon(
+                        task['isFavorite'] ? Icons.favorite : Icons.favorite_border,
+                        color: task['isFavorite'] ? Colors.red : Colors.black,
+                      ),
+                      iconSize: 30,
+                      padding: const EdgeInsets.all(0),
+                      constraints: BoxConstraints(),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -104,7 +157,7 @@ class _MainAppState extends State<MainApp> {
 
   Widget _buildFloatingActionButtons() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0), // Padding below the buttons
+      padding: const EdgeInsets.only(bottom: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -130,15 +183,50 @@ class _MainAppState extends State<MainApp> {
     );
   }
 
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            ),
+            child: Text(
+              'Menu',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          ListTile(
+            title: const Text('Home'),
+            onTap: () {
+              _navigateToPage('Home');
+            },
+          ),
+          ListTile(
+            title: const Text('Favorites'),
+            onTap: () {
+              _navigateToPage('Favorites');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _addTask() {
     if (taskController.text.isNotEmpty) {
       setState(() {
         tasks.add({
           'task': taskController.text,
           'color': _generateRandomBrightColor(),
+          'isFavorite': false,
         });
         taskController.clear();
-        selectedIndex = null; // Clear the selection after adding a new task
+        selectedIndex = null;
       });
     }
   }
@@ -146,8 +234,8 @@ class _MainAppState extends State<MainApp> {
   void _deleteTask() {
     if (selectedIndex != null) {
       setState(() {
-        tasks.removeAt(selectedIndex!); // Remove the selected task
-        selectedIndex = null; // Clear the selection after deletion
+        tasks.removeAt(selectedIndex!);
+        selectedIndex = null;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -160,11 +248,9 @@ class _MainAppState extends State<MainApp> {
 
   void _editTask() {
     if (selectedIndex != null) {
-      // Pre-fill the dialog's text field with the current task text
       final TextEditingController editController =
           TextEditingController(text: tasks[selectedIndex!]['task']);
 
-      // Show dialog for editing the task
       showDialog(
         context: context,
         builder: (context) {
@@ -172,7 +258,7 @@ class _MainAppState extends State<MainApp> {
             title: const Text(
               'Edit Task',
               style: TextStyle(
-                color: Colors.purple, // Title color
+                color: Colors.purple,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -187,35 +273,34 @@ class _MainAppState extends State<MainApp> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.red, // Red background for Cancel button
+                  backgroundColor: Colors.red,
                 ),
                 child: const Text(
                   'Cancel',
                   style: TextStyle(
-                    color: Colors.white, // White text
-                    fontWeight: FontWeight.bold, // Bold text
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               TextButton(
                 onPressed: () {
                   setState(() {
-                    // Update the task with the new text
                     tasks[selectedIndex!]['task'] = editController.text;
                   });
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.green, // Green background for OK button
+                  backgroundColor: Colors.green,
                 ),
                 child: const Text(
                   'OK',
                   style: TextStyle(
-                    color: Colors.white, // White text
-                    fontWeight: FontWeight.bold, // Bold text
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -224,12 +309,36 @@ class _MainAppState extends State<MainApp> {
         },
       );
     } else {
-      // Optional: Show a snackbar or message if no task is selected
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("No task selected for editing."),
         ),
       );
     }
+  }
+}
+
+class FavoritesPage extends StatelessWidget {
+  final List<Map<String, dynamic>> favoriteTasks;
+
+  const FavoritesPage({Key? key, required this.favoriteTasks}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Favorites')),
+      body: favoriteTasks.isEmpty
+          ? const Center(child: Text('No favorite tasks yet!'))
+          : ListView.builder(
+              itemCount: favoriteTasks.length,
+              itemBuilder: (context, index) {
+                final task = favoriteTasks[index];
+                return ListTile(
+                  title: Text(task['task']),
+                  tileColor: task['color'],
+                );
+              },
+            ),
+    );
   }
 }
