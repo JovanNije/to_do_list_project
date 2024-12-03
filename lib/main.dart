@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-
+import 'AboutMePage.dart';
+import 'FavoritesPage.dart';
 void main() {
   runApp(const MaterialApp(home: MainApp(), debugShowCheckedModeBanner: false, )); // Ensure MaterialApp is the root widget
 }
@@ -329,70 +330,3 @@ class _MainAppState extends State<MainApp> {
     }
   }
 }
-
-class FavoritesPage extends StatelessWidget {
-  final List<Map<String, dynamic>> favoriteTasks;
-
-  const FavoritesPage({Key? key, required this.favoriteTasks}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Favorites')),
-      body: favoriteTasks.isEmpty
-          ? const Center(child: Text('No favorite tasks yet!'))
-          : ListView.builder(
-              itemCount: favoriteTasks.length,
-              itemBuilder: (context, index) {
-                final task = favoriteTasks[index];
-                return ListTile(
-                  title: Text(task['task']),
-                  tileColor: task['color'],
-                );
-              },
-            ),
-    );
-  }
-}
-
-class AboutMePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('AboutMe')),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Hi, I am Jovan Lontos',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'I am a passionate developer.',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 32),
-            Text(
-              'Skills & Expertise:',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '- Flutter\n- Dart',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 32),
-            Text(
-              'Feel free to reach out to me via email: jovan123413513@email.com',
-              style: TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
