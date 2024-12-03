@@ -44,7 +44,7 @@ class _MainAppState extends State<MainApp> {
   AppBar _buildAppBar() {
     return AppBar(
       title: const Text('To-Do List'),
-      backgroundColor: Colors.blue,
+      backgroundColor: const Color.fromARGB(255, 35, 149, 243),
     );
   }
 
