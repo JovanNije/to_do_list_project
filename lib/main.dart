@@ -111,14 +111,14 @@ class _MainAppState extends State<MainApp> {
         // Edit Button
         FloatingActionButton(
           onPressed: _editTask,
-          backgroundColor: const Color(0xFF42A5F5),
+          backgroundColor: const Color.fromARGB(255, 245, 149, 229),
           child: const Icon(Icons.edit),
         ),
         const SizedBox(width: 20), // Space between buttons
         // Delete Button
         FloatingActionButton(
           onPressed: _deleteTask,
-          backgroundColor: const Color(0xFF42A5F5),
+          backgroundColor: const Color.fromARGB(255, 223, 82, 82),
           child: const Icon(Icons.delete),
         ),
       ],
