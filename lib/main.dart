@@ -48,17 +48,22 @@ class _MainAppState extends State<MainApp> {
   }
 
   // Navigate to Home or Favorites page
-  void _navigateToPage(String page) {
-    if (page == 'Home') {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => MainApp()),
-      );
-    } else if (page == 'Favorites') {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => FavoritesPage(favoriteTasks: favoriteTasks)),
-      );
-    }
+ void _navigateToPage(String page) {
+  if (page == 'Home') {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => MainApp()),
+    );
+  } else if (page == 'Favorites') {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => FavoritesPage(favoriteTasks: favoriteTasks)),
+    );
+  } else if (page == 'Aboutme') {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => AboutMePage()),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -184,38 +189,45 @@ class _MainAppState extends State<MainApp> {
   }
 
   Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
+  return Drawer(
+    child: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        const DrawerHeader(
+          decoration: BoxDecoration(
+            color: Colors.blue,
+          ),
+          child: Text(
+            'Menu',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
             ),
-            child: Text(
-              'Menu',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
           ),
-          ListTile(
-            title: const Text('Home'),
-            onTap: () {
-              _navigateToPage('Home');
-            },
-          ),
-          ListTile(
-            title: const Text('Favorites'),
-            onTap: () {
-              _navigateToPage('Favorites');
-            },
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+        ListTile(
+          title: const Text('Home'),
+          onTap: () {
+            _navigateToPage('Home');
+          },
+        ),
+        ListTile(
+          title: const Text('Favorites'),
+          onTap: () {
+            _navigateToPage('Favorites');
+          },
+        ),
+        ListTile(
+          title: const Text('About Me'),  // Added About Me
+          onTap: () {
+            _navigateToPage('Aboutme');  // Navigate to AboutMePage
+          },
+        ),
+      ],
+    ),
+  );
+}
+
 
   void _addTask() {
     if (taskController.text.isNotEmpty) {
@@ -342,3 +354,45 @@ class FavoritesPage extends StatelessWidget {
     );
   }
 }
+
+class AboutMePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('AboutMe')),
+      body: const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Hi, I am Jovan Lontos',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'I am a passionate developer.',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 32),
+            Text(
+              'Skills & Expertise:',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '- Flutter\n- Dart',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 32),
+            Text(
+              'Feel free to reach out to me via email: jovan123413513@email.com',
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
