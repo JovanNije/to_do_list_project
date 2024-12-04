@@ -24,6 +24,7 @@ class _MainAppState extends State<MainApp> {
 
   // Variable to keep track of the selected task index
   int? selectedIndex;
+  bool isNightMode = false;
 
   // Function to generate random bright colors
   Color _generateRandomBrightColor() {
@@ -49,18 +50,18 @@ class _MainAppState extends State<MainApp> {
   }
 
   // Navigate to Home or Favorites page
- void _navigateToPage(String page) {
+  void _navigateToPage(String page) {
   if (page == 'Home') {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MainApp()),
     );
   } else if (page == 'Favorites') {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => FavoritesPage(favoriteTasks: favoriteTasks)),
+      MaterialPageRoute(builder: (context) => FavoritesPage(favoriteTasks: favoriteTasks, isNightMode:  isNightMode)),
     );
   } else if (page == 'Aboutme') {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => AboutMePage()),
+      MaterialPageRoute(builder: (context) => AboutMePage(isNightMode: isNightMode)),
     );
   }
 }
@@ -74,6 +75,7 @@ class _MainAppState extends State<MainApp> {
       floatingActionButton: _buildFloatingActionButtons(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       drawer: _buildDrawer(), // Add Drawer (sidebar)
+       backgroundColor: isNightMode ? Colors.grey[850] : Colors.white, // Dark gray for night mode, white for day mode
     );
   }
 
@@ -161,70 +163,101 @@ class _MainAppState extends State<MainApp> {
     );
   }
 
-  Widget _buildFloatingActionButtons() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          FloatingActionButton(
-            onPressed: _addTask,
-            backgroundColor: const Color(0xFF42A5F5),
-            child: const Icon(Icons.add),
-          ),
-          const SizedBox(width: 20),
-          FloatingActionButton(
-            onPressed: _editTask,
-            backgroundColor: const Color.fromRGBO(171, 71, 188, 1),
-            child: const Icon(Icons.edit),
-          ),
-          const SizedBox(width: 20),
-          FloatingActionButton(
-            onPressed: _deleteTask,
-            backgroundColor: const Color(0xFFEF5350),
-            child: const Icon(Icons.delete),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawer() {
-  return Drawer(
-    child: ListView(
-      padding: EdgeInsets.zero,
+Widget _buildFloatingActionButtons() {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 20.0),
+    child: Row(
       children: [
-        const DrawerHeader(
-          decoration: BoxDecoration(
-            color: Colors.blue,
+        // This Expanded widget will allow the buttons to stay centered
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FloatingActionButton(
+                onPressed: _addTask,
+                backgroundColor: const Color(0xFF42A5F5),
+                child: const Icon(Icons.add),
+              ),
+              const SizedBox(width: 20),
+              FloatingActionButton(
+                onPressed: _editTask,
+                backgroundColor: const Color.fromRGBO(171, 71, 188, 1),
+                child: const Icon(Icons.edit),
+              ),
+              const SizedBox(width: 20),
+              FloatingActionButton(
+                onPressed: _deleteTask,
+                backgroundColor: const Color(0xFFEF5350),
+                child: const Icon(Icons.delete),
+              ),
+            ],
           ),
-          child: Text(
-            'Menu',
-            style: TextStyle(
+        ),
+        // Night Mode Toggle Button with 20px padding from the right
+        Padding(
+          padding: const EdgeInsets.only(right: 20.0),  // Add 20px padding
+          child: FloatingActionButton(
+            onPressed: _toggleNightMode,
+            backgroundColor: isNightMode ? Colors.blue : Colors.grey, // Blue when night mode is on, grey when off
+            child: Icon(
+              isNightMode ? Icons.nightlight_round : Icons.wb_sunny,
               color: Colors.white,
-              fontSize: 24,
             ),
           ),
         ),
-        ListTile(
-          title: const Text('Home'),
-          onTap: () {
-            _navigateToPage('Home');
-          },
-        ),
-        ListTile(
-          title: const Text('Favorites'),
-          onTap: () {
-            _navigateToPage('Favorites');
-          },
-        ),
-        ListTile(
-          title: const Text('About Me'),  // Added About Me
-          onTap: () {
-            _navigateToPage('Aboutme');  // Navigate to AboutMePage
-          },
-        ),
       ],
+    ),
+  );
+}
+
+  Widget _buildDrawer() {
+  return Drawer(
+    child: Container(
+      color: isNightMode ? Colors.grey[850] : Colors.white, // Change background color based on night mode
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue, // Fixed color for the header
+            ),
+            child: Text(
+              'Menu',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+            ),
+          ),
+          ListTile(
+            title: Text(
+              'Home',
+              style: TextStyle(color: isNightMode ? Colors.white : Colors.black), // Change text color based on night mode
+            ),
+            onTap: () {
+              _navigateToPage('Home');
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Favorites',
+              style: TextStyle(color: isNightMode ? Colors.white : Colors.black), // Change text color based on night mode
+            ),
+            onTap: () {
+              _navigateToPage('Favorites');
+            },
+          ),
+          ListTile(
+            title: Text(
+              'About Me',
+              style: TextStyle(color: isNightMode ? Colors.white : Colors.black), // Change text color based on night mode
+            ),
+            onTap: () {
+              _navigateToPage('Aboutme');
+            },
+          ),
+        ],
+      ),
     ),
   );
 }
@@ -329,4 +362,10 @@ class _MainAppState extends State<MainApp> {
       );
     }
   }
+
+  void _toggleNightMode() {
+  setState(() {
+    isNightMode = !isNightMode; // Toggle the value of isNightMode
+  });
+}
 }
